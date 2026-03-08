@@ -140,7 +140,7 @@ def main():
             end_str = 'Current'
         start_date = parse_date(start_str)
         end_date = parse_date(end_str)
-        fig_timeline.add_trace(go.Scatter(x=[start_date, end_date], y=[exp['title'], exp['title']], mode='lines+markers', name=exp['title']))
+        fig_timeline.add_trace(go.Scatter(x=[start_date, end_date], y=[exp['title'], exp['title']], mode='lines+markers', name=exp['title'], line=dict(width=4)))
     fig_timeline.update_layout(title='Career Timeline', xaxis_title='Time', yaxis_title='Position')
     st.plotly_chart(fig_timeline)
     
