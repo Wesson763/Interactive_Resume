@@ -94,7 +94,7 @@ def main():
     skills_text = ' '.join(sections.get('TECHNICAL SKILLS', []))
     skills_list = [s.strip() for s in skills_text.replace('Skills:', '').split(',')]
     # Assign levels (dummy for now, can be improved)
-    skills_data = [{'Skill': skill, 'Level': 3 if 'Python' in skill or 'SQL' in skill else 2} for skill in skills_list]
+    skills_data = [{'Skill': skill, 'Level': 4 if 'Product' in skill else 3 if 'Python' in skill or 'SQL' in skill else 2} for skill in skills_list]
     skills_df = pd.DataFrame(skills_data)
     skills_df = skills_df[skills_df['Level'] >= min_level]
     st.table(skills_df)
