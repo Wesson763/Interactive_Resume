@@ -129,6 +129,11 @@ def main():
     if current_exp:
         experiences.append(current_exp)
     
+    # Correct dates if needed
+    for exp in experiences:
+        if 'Applied AI' in exp['title']:
+            exp['dates'] = 'Jan 2026 - Current'
+    
     # Create timeline
     fig_timeline = go.Figure()
     for exp in experiences:
