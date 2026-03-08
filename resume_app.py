@@ -4,6 +4,16 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import re
+
+def parse_date(date_str):
+    if date_str.lower() == 'current':
+        return datetime.now()
+    try:
+        return datetime.strptime(date_str.strip(), '%b %Y')
+    except ValueError:
+        # Fallback for other formats
+        return datetime(2022, 1, 1)
 
 # Function to extract text from PDF
 def extract_resume_text(pdf_path):
@@ -99,12 +109,17 @@ def main():
     exp_lines = sections.get('EXPERIENCE', [])
     experiences = []
     current_exp = {}
+    months = r'(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)'
     for line in exp_lines:
-        if ' - ' in line and any(char.isdigit() for char in line):
+        if re.search(months, line):
+            # This is a title line with dates
+            match = re.search(months, line)
+            pos = match.start()
+            title = line[:pos].strip().rstrip('-').strip()
+            dates = line[pos:].strip()
             if current_exp:
                 experiences.append(current_exp)
-            parts = line.split(' - ')
-            current_exp = {'title': parts[0], 'dates': parts[1] if len(parts)>1 else ''}
+            current_exp = {'title': title, 'dates': dates}
         elif '|' in line:
             current_exp['company'] = line.split('|')[0].strip()
         elif line.startswith('●'):
@@ -117,8 +132,14 @@ def main():
     # Create timeline
     fig_timeline = go.Figure()
     for exp in experiences:
-        start_date = exp['dates'].split(' - ')[0] if ' - ' in exp['dates'] else '2022'
-        end_date = exp['dates'].split(' - ')[1] if ' - ' in exp['dates'] else 'Current'
+        dates_part = exp.get('dates', '')
+        if ' - ' in dates_part:
+            start_str, end_str = dates_part.split(' - ', 1)
+        else:
+            start_str = dates_part
+            end_str = 'Current'
+        start_date = parse_date(start_str)
+        end_date = parse_date(end_str)
         fig_timeline.add_trace(go.Scatter(x=[start_date, end_date], y=[exp['title'], exp['title']], mode='lines+markers', name=exp['title']))
     fig_timeline.update_layout(title='Career Timeline', xaxis_title='Time', yaxis_title='Position')
     st.plotly_chart(fig_timeline)
